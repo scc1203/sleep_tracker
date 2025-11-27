@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的睡眠艺术</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌙</text></svg>">
+    
+    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://unpkg.com/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://unpkg.com/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    
+    <style>
+        :root { --primary: #6a89cc; --bg: #fdfdfd; --font: -apple-system, sans-serif; }
+        body { font-family: var(--font); background: var(--bg); color: #444; margin: 0; padding: 15px; padding-bottom: 50px; display: flex; flex-direction: column; align-items: center; -webkit-tap-highlight-color: transparent; }
+        
+        .toolbar { width: 100%; max-width: 600px; margin-bottom: 10px; display: flex; justify-content: flex-end; gap: 15px; }
+        .tool-link { font-size: 13px; color: #6a89cc; text-decoration: underline; cursor: pointer; border: none; background: none; padding: 5px; }
+
+        #backupArea { display: none; width: 100%; max-width: 600px; background: #fff; border: 2px dashed #ddd; padding: 15px; margin-bottom: 20px; border-radius: 10px; box-sizing: border-box; }
+        .backup-section { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        .backup-section:last-child { border: none; margin: 0; padding: 0; }
+        .backup-title { font-size: 13px; font-weight: bold; color: #555; margin-bottom: 8px; display: block; }
+        .btn-row { display: flex; gap: 10px; margin-bottom: 5px; }
+        .sm-btn { flex: 1; padding: 10px 0; border-radius: 6px; border: 1px solid #ddd; background:#f9f9f9; font-size: 13px; color: #555; cursor: pointer; }
+        .btn-primary { background: var(--primary); color: white; border:none; }
+        textarea { width: 100%; height: 60px; font-family: monospace; font-size: 12px; border: 1px solid #eee; background: #fafafa; padding: 8px; resize: none; border-radius: 6px; margin-bottom: 5px; box-sizing: border-box;}
+        #fileInput { display: none; }
+
+        .input-panel { background: white; padding: 18px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; width: 100%; max-width: 600px; box-sizing: border-box; }
+        .input-group { display: flex; flex-direction: column; flex: 1; min-width: 85px; }
+        label { font-size: 12px; color: #888; margin-bottom: 6px; }
+        input { padding: 10px; border: 1px solid #eee; border-radius: 8px; font-size: 16px; background: #fafafa; width: 100%; box-sizing: border-box; appearance: none; }
+        .main-btn { padding: 12px 0; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; width: 100%; margin-top: 5px; cursor: pointer; }
+
+        .chart-container-wrapper { width: 100%; max-width: 1000px; overflow-x: auto; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); padding: 10px; margin-bottom: 30px; min-height: 200px; scroll-behavior: smooth;}
+        .chart-body { position: relative; height: 500px; min-width: 100%; }
+        #offlineTip { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #999; font-size: 12px; text-align: center; width: 100%; display: none;}
+
+        .history-panel { width: 100%; max-width: 600px; margin-bottom: 60px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { color: #999; font-weight: 500; text-align: left; padding: 10px 5px; border-bottom: 1px solid #eee; }
+        td { padding: 12px 5px; border-bottom: 1px solid #f9f9f9; color: #555; }
+        .act-btn { background: #f1f2f6; color: #555; border:none; padding:4px 8px; border-radius:4px; font-size: 11px; margin-right: 4px;}
+        
+        #statusMsg { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; display: none; pointer-events: none; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.2); white-space: nowrap;}
+    </style>
+</head>
+<body>
+
+    <div id="statusMsg"></div>
+
+    <div class="toolbar">
+        <button class="tool-link" onclick="toggleBackup()">🛠 数据备份/恢复</button>
+    </div>
+
+    <div id="backupArea">
+        <div class="backup-section">
+            <span class="backup-title">📁 方式一：文件 (电脑/Documents)</span>
+            <div class="btn-row">
+                <button class="sm-btn" onclick="exportFile()">📤 导出</button>
+                <button class="sm-btn btn-primary" onclick="document.getElementById('fileInput').click()">📥 导入</button>
+                <input type="file" id="fileInput" accept=".json" onchange="importFile(this)">
+            </div>
+        </div>
+        <div class="backup-section">
+            <span class="backup-title">📝 方式二：纯文本 (手机复制)</span>
+            <textarea id="dataBox" placeholder="数据代码..."></textarea>
+            <div class="btn-row">
+                <button class="sm-btn btn-primary" onclick="loadFromBox()">🔄 确认恢复</button>
+            </div>
+        </div>
+    </div>
+
+    <h2>🌙 睡眠艺术 V5.0</h2>
+
+    <div class="input-panel">
+        <div class="input-group">
+            <label>日期 (入睡前)</label>
+            <input type="date" id="dateInput">
+        </div>
+        <div class="input-group">
+            <label>入睡</label>
+            <input type="time" id="bedInput" value="02:00">
+        </div>
+        <div class="input-group">
+            <label>醒来</label>
+            <input type="time" id="wakeInput" value="13:30">
+        </div>
+        <button class="main-btn" onclick="addData()">记录并查看</button>
+    </div>
+
+    <div class="chart-container-wrapper">
+        <div class="chart-body" id="chartBody">
+            <div id="offlineTip">图表加载中...</div>
+            <canvas id="sleepChart"></canvas>
+        </div>
+    </div>
+
+    <div class="history-panel">
+        <h3>历史记录</h3>
+        <table id="historyTable">
+            <thead><tr><th>日期</th><th>时间</th><th>时长/评分</th><th>操作</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        // 历史数据
+        const PRELOAD_DATA = [{"date":"2025-10-23","bedTime":"06:14","wakeTime":"11:19","duration":5.08,"startVal":30.23,"endVal":35.31,"score":49},{"date":"2025-10-24","bedTime":"04:24","wakeTime":"12:12","duration":7.8,"startVal":28.4,"endVal":36.2,"score":78},{"date":"2025-10-25","bedTime":"02:45","wakeTime":"11:09","duration":8.4,"startVal":26.75,"endVal":35.15,"score":86},{"date":"2025-10-26","bedTime":"03:12","wakeTime":"11:30","duration":8.3,"startVal":27.2,"endVal":35.5,"score":84},{"date":"2025-10-27","bedTime":"04:46","wakeTime":"12:42","duration":7.93,"startVal":28.76,"endVal":36.7,"score":76},{"date":"2025-10-28","bedTime":"00:54","wakeTime":"10:13","duration":9.32,"startVal":24.9,"endVal":34.21,"score":96},{"date":"2025-10-29","bedTime":"03:52","wakeTime":"08:43","duration":4.85,"startVal":27.86,"endVal":32.71,"score":59},{"date":"2025-10-30","bedTime":"03:23","wakeTime":"11:23","duration":8,"startVal":27.38,"endVal":35.38,"score":83},{"date":"2025-10-31","bedTime":"06:51","wakeTime":"12:34","duration":5.72,"startVal":30.85,"endVal":36.56,"score":52},{"date":"2025-11-01","bedTime":"03:39","wakeTime":"11:34","duration":7.92,"startVal":27.65,"endVal":35.56,"score":82},{"date":"2025-11-02","bedTime":"06:49","wakeTime":"10:57","duration":4.13,"startVal":30.81,"endVal":34.95,"score":39},{"date":"2025-11-03","bedTime":"05:09","wakeTime":"13:34","duration":8.42,"startVal":29.15,"endVal":37.56,"score":74},{"date":"2025-11-04","bedTime":"01:09","wakeTime":"10:16","duration":9.12,"startVal":25.15,"endVal":34.26,"score":94},{"date":"2025-11-05","bedTime":"03:21","wakeTime":"11:20","duration":7.98,"startVal":27.35,"endVal":35.33,"score":83},{"date":"2025-11-06","bedTime":"04:25","wakeTime":"12:25","duration":8,"startVal":28.41,"endVal":36.41,"score":78},{"date":"2025-11-07","bedTime":"06:45","wakeTime":"14:29","duration":7.73,"startVal":30.75,"endVal":38.48,"score":66},{"date":"2025-11-08","bedTime":"13:30","wakeTime":"20:10","duration":6.67,"startVal":37.5,"endVal":44.16,"score":26},{"date":"2025-11-09","bedTime":"05:22","wakeTime":"14:21","duration":8.98,"startVal":29.36,"endVal":38.35,"score":73},{"date":"2025-11-10","bedTime":"02:33","wakeTime":"08:02","duration":5.48,"startVal":26.55,"endVal":32.03,"score":71},{"date":"2025-11-11","bedTime":"04:46","wakeTime":"13:45","duration":8.98,"startVal":28.76,"endVal":37.75,"score":76},{"date":"2025-11-12","bedTime":"05:05","wakeTime":"13:59","duration":8.9,"startVal":29.08,"endVal":37.98,"score":75},{"date":"2025-11-13","bedTime":"06:17","wakeTime":"14:38","duration":8.35,"startVal":30.28,"endVal":38.63,"score":69},{"date":"2025-11-14","bedTime":"02:40","wakeTime":"10:10","duration":7.5,"startVal":26.66,"endVal":34.16,"score":87},{"date":"2025-11-15","bedTime":"00:06","wakeTime":"06:02","duration":5.93,"startVal":24.1,"endVal":30.03,"score":87},{"date":"2025-11-16","bedTime":"05:41","wakeTime":"13:23","duration":7.7,"startVal":29.68,"endVal":37.38,"score":72},{"date":"2025-11-17","bedTime":"09:06","wakeTime":"16:00","duration":6.9,"startVal":33.1,"endVal":40,"score":50},{"date":"2025-11-18","bedTime":"05:20","wakeTime":"13:05","duration":7.75,"startVal":29.33,"endVal":37.08,"score":73},{"date":"2025-11-19","bedTime":"05:12","wakeTime":"13:12","duration":8,"startVal":29.2,"endVal":37.2,"score":74},{"date":"2025-11-20","bedTime":"06:42","wakeTime":"11:00","duration":4.3,"startVal":30.7,"endVal":35,"score":41},{"date":"2025-11-21","bedTime":"07:25","wakeTime":"14:00","duration":6.58,"startVal":31.41,"endVal":38,"score":56},{"date":"2025-11-22","bedTime":"05:02","wakeTime":"12:05","duration":7.05,"startVal":29.03,"endVal":36.08,"score":71},{"date":"2025-11-23","bedTime":"06:22","wakeTime":"14:09","duration":7.78,"startVal":30.36,"endVal":38.15,"score":68}];
+
+        let sleepData = JSON.parse(localStorage.getItem('mySleepData_v3'));
+        if (!sleepData || sleepData.length === 0) {
+            sleepData = PRELOAD_DATA;
+            localStorage.setItem('mySleepData_v3', JSON.stringify(sleepData));
+        }
+        
+        try { 
+            if(typeof Chart !== 'undefined') {
+                Chart.register(window['chartjs-plugin-annotation']); 
+                Chart.register(ChartDataLabels);
+            } else { document.getElementById('offlineTip').style.display = 'block'; }
+        } catch(e) {}
+
+        function showMsg(text) {
+            const el = document.getElementById('statusMsg');
+            el.innerText = text; el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+        function toggleBackup() {
+            const area = document.getElementById('backupArea');
+            area.style.display = (area.style.display === 'block') ? 'none' : 'block';
+            if(area.style.display === 'block') document.getElementById('dataBox').value = JSON.stringify(sleepData);
+        }
+        function exportFile() {
+            if(sleepData.length === 0) return showMsg("❌ 没有数据");
+            const blob = new Blob([JSON.stringify(sleepData, null, 2)], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url;
+            a.download = `sleep_backup_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            showMsg("✅ 文件已生成");
+        }
+        function importFile(input) {
+            const file = input.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    if(Array.isArray(json)) { sleepData = json; saveAndRender(); showMsg(`✅ 导入 ${json.length} 条数据`); toggleBackup(); } 
+                    else { showMsg("❌ 格式错误"); }
+                } catch(err) { showMsg("❌ 文件无法读取"); }
+                input.value = '';
+            }; reader.readAsText(file);
+        }
+        function loadFromBox() {
+            const raw = document.getElementById('dataBox').value.trim();
+            if(!raw) return showMsg("❌ 请先粘贴数据");
+            try {
+                const json = JSON.parse(raw);
+                if(Array.isArray(json)) { sleepData = json; saveAndRender(); showMsg(`✅ 恢复 ${json.length} 条数据`); toggleBackup(); } 
+                else { showMsg("❌ 格式错误"); }
+            } catch(e) { showMsg("❌ 代码不完整"); }
+        }
+
+        // --- 逻辑区 ---
+        function calculateScore(duration, startVal) {
+            let score = 100;
+            if (duration < 7) score -= (7 - duration) * 10; 
+            if (duration > 10) score -= (duration - 10) * 5;
+            if (startVal > 25) { 
+                let delay = startVal - 25; 
+                score -= delay * 3; 
+            }
+            return Math.max(0, Math.min(100, Math.round(score)));
+        }
+
+        function timeToNumber(timeStr) {
+            const [h, m] = timeStr.split(':').map(Number);
+            let val = h + m / 60;
+            if (val < 18) val += 24;
+            return val;
+        }
+        function numberToTime(num) {
+            if (num >= 24) num -= 24;
+            let h = Math.floor(num);
+            let m = Math.round((num - h) * 60);
+            if (m === 60) { h += 1; m = 0; }
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+
+        function addData() {
+            const date = document.getElementById('dateInput').value;
+            const bedTime = document.getElementById('bedInput').value;
+            const wakeTime = document.getElementById('wakeInput').value;
+            if (!date || !bedTime || !wakeTime) return showMsg("❌ 请填写完整");
+            
+            const existingIndex = sleepData.findIndex(d => d.date === date);
+            if (existingIndex >= 0) {
+                if(!confirm(`⚠️ 日期 ${date} 已存在！\n确定要覆盖吗？`)) return;
+            }
+
+            let startVal = timeToNumber(bedTime);
+            let endVal = timeToNumber(wakeTime);
+            if (endVal < startVal) endVal += 24;
+            let duration = parseFloat((endVal - startVal).toFixed(2));
+            let score = calculateScore(duration, startVal);
+
+            const newData = { date, bedTime, wakeTime, duration, startVal, endVal, score };
+            if (existingIndex >= 0) { sleepData[existingIndex] = newData; showMsg("✅ 已更新"); } 
+            else { sleepData.push(newData); showMsg("✅ 已记录"); }
+            
+            sleepData.sort((a, b) => new Date(a.date) - new Date(b.date));
+            saveAndRender(); 
+            
+            // 记录后自动滚动到最右侧
+            setTimeout(() => {
+                const wrapper = document.querySelector('.chart-container-wrapper');
+                wrapper.scrollLeft = wrapper.scrollWidth;
+            }, 100);
+        }
+
+        function editData(index) {
+            // 注意：index 是表格点击传来的，需要映射回 sleepData
+            // 因为表格是倒序显示的
+            // 方法：我们直接操作 sleepData，但需要找到正确的项。
+            // 简单点，在渲染表格时，把 item 的真实 index 传进去。
+            // 由于 editData 的参数 index 是 sleepData 的真实索引 (见renderTable逻辑)，直接用即可。
+            const item = sleepData[index];
+            document.getElementById('dateInput').value = item.date;
+            document.getElementById('bedInput').value = item.bedTime;
+            document.getElementById('wakeInput').value = item.wakeTime;
+            sleepData.splice(index, 1); saveAndRender(); 
+            window.scrollTo({top:0, behavior:'smooth'}); showMsg("📝 提取修改");
+        }
+        function deleteData(index) { sleepData.splice(index, 1); saveAndRender(); showMsg("🗑️ 已删除"); }
+        function saveAndRender() { localStorage.setItem('mySleepData_v3', JSON.stringify(sleepData)); renderTable(); renderChart(); }
+        
+        function renderTable() {
+            const tbody = document.querySelector('#historyTable tbody');
+            tbody.innerHTML = '';
+            
+            // 倒序显示：创建副本并反转，但保留原始索引用于删除/修改
+            const reversedData = sleepData.map((item, index) => ({item, index})).reverse();
+
+            reversedData.forEach(({item, index}) => {
+                item.score = calculateScore(item.duration, item.startVal);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${item.date.slice(5)}</td><td>${item.bedTime}<br><span style="color:#ddd">|</span><br>${item.wakeTime}</td>
+                <td><span style="color:${item.duration>=7?'#20bf6b':'#f39c12'};font-weight:bold">${item.duration}h</span><br>
+                <span style="font-size:11px; padding:2px 6px; border-radius:4px; color:white; background:${getScoreColor(item.score)}">${item.score}分</span></td>
+                <td><button class="act-btn" onclick="editData(${index})">改</button><button class="act-btn" onclick="deleteData(${index})">删</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getScoreColor(score) {
+            if(score >= 80) return '#20bf6b'; 
+            if(score >= 60) return '#f39c12'; 
+            return '#ff4757'; 
+        }
+
+        let myChart = null;
+        function renderChart() {
+            const ctx = document.getElementById('sleepChart').getContext('2d');
+            if (typeof Chart === 'undefined') return;
+            document.getElementById('offlineTip').style.display = 'none';
+
+            const minW = 55;
+            const w = Math.max(document.querySelector('.chart-container-wrapper').offsetWidth, sleepData.length * minW);
+            document.getElementById('chartBody').style.width = `${w}px`;
+            
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sleepData.map(d => d.date.slice(5)),
+                    datasets: [
+                        { 
+                            label: '入睡', 
+                            data: sleepData.map(d => d.startVal), 
+                            borderColor: '#A2D2FF', backgroundColor: '#A2D2FF', borderWidth: 2, tension: 0.3, yAxisID: 'yTime', 
+                            pointStyle: (ctx) => (ctx.raw <= 24.5) ? 'star' : 'circle',
+                            pointRadius: (ctx) => (ctx.raw <= 24.5) ? 8 : 4,
+                            pointBackgroundColor: (ctx) => {
+                                const v = ctx.raw;
+                                if (v <= 24.5) return '#ffd700'; 
+                                if (v < 27) return '#FDE598'; 
+                                return '#A2D2FF'; 
+                            },
+                            pointBorderColor: (ctx) => {
+                                const v = ctx.raw;
+                                if (v <= 24.5) return '#ffd700';
+                                if (v < 27) return '#FDE598'; 
+                                return '#A2D2FF';
+                            },
+                            datalabels: {align:'bottom', color:'#A2D2FF', font:{size:9}, formatter: (v)=>numberToTime(v)} 
+                        },
+                        { 
+                            label: '起床', 
+                            data: sleepData.map(d => d.endVal), 
+                            borderColor: '#FFC8DD', backgroundColor: '#FFC8DD', borderWidth: 2, tension: 0.3, yAxisID: 'yTime', pointRadius: 4, 
+                            datalabels: {align:'top', color:'#FFC8DD', font:{size:9}, formatter: (v)=>numberToTime(v)} 
+                        },
+                        { 
+                            label: '时长', 
+                            data: sleepData.map(d => d.duration), 
+                            type: 'scatter', 
+                            yAxisID: 'yDuration', 
+                            pointStyle: (ctx) => {
+                                const v = ctx.raw; 
+                                const score = calculateScore(v, sleepData[ctx.dataIndex].startVal);
+                                const color = getScoreColor(score);
+                                const cvs = document.createElement('canvas'); 
+                                cvs.width=40; cvs.height=50; 
+                                const c = cvs.getContext('2d'); 
+                                c.fillStyle = color; c.beginPath(); c.roundRect(5, 0, 30, 14, 4); c.fill();
+                                c.fillStyle = 'white'; c.font = 'bold 10px Arial'; c.textAlign='center'; c.fillText(score, 20, 11);
+                                c.font = '14px Arial'; c.textBaseline='middle'; c.fillText(v>=7?'🔋':'🪫', 20, 24); 
+                                return cvs;
+                            }, 
+                            datalabels: {
+                                align: 'bottom', offset: 15, 
+                                color: (ctx) => ctx.dataset.data[ctx.dataIndex] >= 7 ? '#20bf6b' : '#f39c12',
+                                font:{size:9, weight:'bold'}, formatter:(v)=>v+'h'
+                            } 
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, 
+                    events: ['click'], interaction: { mode: 'nearest', axis: 'x', intersect: true },
+                    layout: { padding: { top: 30, right: 80, bottom: 20 } }, 
+                    clip: false,
+                    plugins: { 
+                        legend:{display:false}, 
+                        tooltip: { enabled: true },
+                        annotation: { 
+                            annotations: {
+                                line0: {
+                                    type:'line', scaleID:'yTime', value:24, 
+                                    borderColor:'#333', borderWidth:1.5, borderDash:[6,4],
+                                    label: { content:'00:00', display:true, position:'end', xAdjust: 60, color:'#333', font:{size:10, weight:'bold'}, backgroundColor:'transparent' }
+                                },
+                                line3: {
+                                    type:'line', scaleID:'yTime', value:27, 
+                                    borderColor:'#ff4757', borderWidth:1, borderDash:[6,6],
+                                    label: { content:'03:00', display:true, position:'end', xAdjust: 60, color:'#ff4757', font:{size:10, weight:'bold'}, backgroundColor:'transparent' }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {grid:{display:false}}, 
+                        yTime: { type:'linear', position:'left', min:21, max:46, ticks:{display:true, color:'#ccc', stepSize:2, callback:(v)=>numberToTime(v)} },
+                        yDuration: { type:'linear', position:'right', grid:{display:false}, min:-30, max:14, ticks:{stepSize:2, color:'#ddd', callback:(v)=>(v>0&&v%2===0)?v+'h':''} }
+                    }
+                }
+            });
+        }
+        
+        // 核心修改：设置默认日期为昨天
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        document.getElementById('dateInput').valueAsDate = yesterday;
+        
+        saveAndRender();
+        
+        // 打开时自动滚动到最右边
+        setTimeout(() => {
+            const wrapper = document.querySelector('.chart-container-wrapper');
+            wrapper.scrollLeft = wrapper.scrollWidth;
+        }, 500); // 稍微延迟以确保canvas渲染完毕
+
+        document.getElementById('sleepChart').onclick = function(evt) {
+            const points = myChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+            if (points.length === 0) {
+                myChart.tooltip.setActiveElements([], {x: 0, y: 0});
+                myChart.update();
+            }
+        };
+    </script>
+</body>
+</html>
