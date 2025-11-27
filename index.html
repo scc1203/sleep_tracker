@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>睡眠艺术 V6.0 (通用分享版)</title>
+    <title>睡眠艺术 V7.0</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌙</text></svg>">
     
     <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.js"></script>
@@ -17,52 +17,70 @@
         /* 顶部工具栏 */
         .toolbar { width: 100%; max-width: 600px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .app-title { font-size: 16px; font-weight: bold; color: #555; letter-spacing: 1px; }
-        .tool-link { font-size: 13px; color: #6a89cc; text-decoration: underline; cursor: pointer; border: none; background: none; padding: 5px; }
+        .tool-link { font-size: 13px; color: #6a89cc; text-decoration: underline; cursor: pointer; border: none; background: none; padding: 5px; position: relative;}
 
-        /* 折叠面板通用样式 */
+        /* 面板样式 */
         .collapse-panel { display: none; width: 100%; max-width: 600px; background: #fff; border: 2px dashed #ddd; padding: 15px; margin-bottom: 20px; border-radius: 10px; box-sizing: border-box; }
         .panel-title { font-size: 13px; font-weight: bold; color: #555; margin-bottom: 10px; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         
-        /* 设置区域 */
         .setting-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 13px; }
         .setting-input { padding: 5px; border: 1px solid #ddd; border-radius: 5px; width: 80px; text-align: center; }
 
-        /* 备份区域按钮 */
         .btn-row { display: flex; gap: 10px; margin-top: 10px; }
         .sm-btn { flex: 1; padding: 8px 0; border-radius: 6px; border: 1px solid #ddd; background:#f9f9f9; font-size: 12px; color: #555; cursor: pointer; }
         .btn-primary { background: var(--primary); color: white; border:none; }
         .btn-danger { background: #ff7675; color: white; border:none; }
+        .btn-undo { background: #ffeaa7; color: #d35400; border:1px solid #e1b12c; }
+
         textarea { width: 100%; height: 50px; font-family: monospace; font-size: 12px; border: 1px solid #eee; background: #fafafa; padding: 5px; resize: none; border-radius: 6px; margin-bottom: 5px; box-sizing: border-box;}
         #fileInput { display: none; }
 
-        /* 输入面板 */
         .input-panel { background: white; padding: 18px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; width: 100%; max-width: 600px; box-sizing: border-box; }
         .input-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; }
         .input-group { display: flex; flex-direction: column; flex: 1; min-width: 85px; }
         label { font-size: 12px; color: #888; margin-bottom: 6px; }
         input[type="date"], input[type="time"], input[type="text"] { padding: 10px; border: 1px solid #eee; border-radius: 8px; font-size: 16px; background: #fafafa; width: 100%; box-sizing: border-box; appearance: none; }
-        .note-input { width: 100%; font-size: 14px; } /* 备注框样式 */
+        .note-input { width: 100%; font-size: 14px; }
         .main-btn { padding: 12px 0; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; width: 100%; cursor: pointer; margin-top: 5px;}
 
-        /* 图表 */
         .chart-container-wrapper { width: 100%; max-width: 1000px; overflow-x: auto; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); padding: 10px; margin-bottom: 30px; min-height: 200px; scroll-behavior: smooth;}
         .chart-body { position: relative; height: 500px; min-width: 100%; }
         #offlineTip { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #999; font-size: 12px; text-align: center; width: 100%; display: none;}
 
-        /* 表格 */
         .history-panel { width: 100%; max-width: 600px; margin-bottom: 60px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; } /* 固定布局防止备注撑爆 */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
         th { color: #999; font-weight: 500; text-align: left; padding: 10px 5px; border-bottom: 1px solid #eee; }
         td { padding: 12px 5px; border-bottom: 1px solid #f9f9f9; color: #555; vertical-align: top; }
         .note-text { display: block; font-size: 11px; color: #999; margin-top: 4px; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px;}
         .act-btn { background: #f1f2f6; color: #555; border:none; padding:4px 8px; border-radius:4px; font-size: 11px; margin-right: 4px;}
         
         #statusMsg { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; display: none; pointer-events: none; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.2); white-space: nowrap;}
+
+        /* 欢迎弹窗样式 */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: none; justify-content: center; align-items: center; }
+        .modal-box { background: white; width: 85%; max-width: 400px; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; }
+        .modal-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 10px; }
+        .modal-text { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 20px; text-align: left; }
+        .modal-btn { background: var(--primary); color: white; padding: 10px 30px; border: none; border-radius: 20px; font-size: 14px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="statusMsg"></div>
+
+    <div class="modal-overlay" id="welcomeModal">
+        <div class="modal-box">
+            <div class="modal-title">✨ 欢迎来到睡眠艺术</div>
+            <div class="modal-text">
+                <p>这是一个帮你记录和改善睡眠的小工具。</p>
+                <p>⚙️ <b>重要提示：</b>请点击右上角的<b>“设置”</b>，根据你的作息习惯设定<b>“熬夜红线”</b>（默认 03:00）。</p>
+                <p>🌟 <b>成就系统：</b><br>
+                - 红线前入睡：获得黄色圆点<br>
+                - 0点前入睡：获得金色星星奖励</p>
+            </div>
+            <button class="modal-btn" onclick="closeWelcome()">开始旅程</button>
+        </div>
+    </div>
 
     <div class="toolbar">
         <span class="app-title">🌙 睡眠艺术</span>
@@ -79,12 +97,20 @@
             <input type="time" id="limitTimeInput" class="setting-input" value="03:00" onchange="saveSettings()">
         </div>
         <div style="font-size:11px; color:#999; margin-top:5px;">
-            * 此时间之前入睡显示为黄色圆点，0点前入睡显示为星星。
+            * 此时间前入睡为达标(黄点)，0点前为优秀(星星)，红线后为熬夜(蓝点)。
         </div>
     </div>
 
     <div id="backupPanel" class="collapse-panel">
-        <span class="panel-title">数据管理</span>
+        <span class="panel-title">数据与时光机</span>
+        
+        <div style="background:#fff8e1; padding:10px; border-radius:6px; border:1px solid #ffeaa7; margin-bottom:15px;">
+            <span style="font-size:12px; font-weight:bold; color:#d35400;">⏳ 时光机 (后悔药)</span>
+            <div style="font-size:11px; color:#e67e22; margin-bottom:5px;">如果不小心删错或改错了，点此恢复上一步。</div>
+            <button class="sm-btn btn-undo" onclick="restoreSnapshot()">⏪ 撤销上一步操作</button>
+        </div>
+
+        <span class="panel-title">备份与迁移</span>
         <div class="btn-row">
             <button class="sm-btn" onclick="exportFile()">📤 导出文件</button>
             <button class="sm-btn btn-primary" onclick="document.getElementById('fileInput').click()">📥 导入文件</button>
@@ -95,8 +121,9 @@
             <button class="sm-btn" onclick="pasteTextData()">🔄 粘贴恢复</button>
         </div>
         <textarea id="dataBox" placeholder="文本数据交换区..." style="margin-top:10px;"></textarea>
+        
         <div class="btn-row" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
-            <button class="sm-btn btn-danger" onclick="clearAllData()">🗑️ 清空所有数据 (慎用)</button>
+            <button class="sm-btn btn-danger" onclick="clearAllData()">🗑️ 清空所有数据</button>
             <button class="sm-btn" onclick="resetDemoData()">♻️ 恢复示范数据</button>
         </div>
     </div>
@@ -139,22 +166,18 @@
     </div>
 
     <script>
-        // --- 示范数据 (仅保留3条不同类型的) ---
+        // --- 示范数据 ---
         const DEMO_DATA = [
             {"date":"2025-11-20","bedTime":"23:30","wakeTime":"07:30","duration":8,"startVal":23.5,"endVal":31.5,"score":100,"note":"早睡奖励✨"},
             {"date":"2025-11-21","bedTime":"02:15","wakeTime":"10:00","duration":7.75,"startVal":26.25,"endVal":34,"score":86,"note":"看电影"},
             {"date":"2025-11-22","bedTime":"04:30","wakeTime":"11:00","duration":6.5,"startVal":28.5,"endVal":35,"score":65,"note":"赶Deadline"}
         ];
 
-        // --- 初始化数据与设置 ---
         let sleepData = JSON.parse(localStorage.getItem('mySleepData_v6'));
-        // 如果没有数据，加载示范数据
         if (!sleepData) {
-            sleepData = JSON.parse(JSON.stringify(DEMO_DATA)); // 深度复制
+            sleepData = JSON.parse(JSON.stringify(DEMO_DATA));
             localStorage.setItem('mySleepData_v6', JSON.stringify(sleepData));
         }
-
-        // 读取用户设置 (红线时间)
         let userSettings = JSON.parse(localStorage.getItem('mySleepSettings')) || { limitTime: '03:00' };
         document.getElementById('limitTimeInput').value = userSettings.limitTime;
         
@@ -165,14 +188,21 @@
             } else { document.getElementById('offlineTip').style.display = 'block'; }
         } catch(e) {}
 
-        // --- 交互功能 ---
+        // --- 欢迎弹窗逻辑 ---
+        if (!localStorage.getItem('v7_intro_shown')) {
+            document.getElementById('welcomeModal').style.display = 'flex';
+        }
+        function closeWelcome() {
+            document.getElementById('welcomeModal').style.display = 'none';
+            localStorage.setItem('v7_intro_shown', 'true');
+        }
+
         function showMsg(text) {
             const el = document.getElementById('statusMsg');
             el.innerText = text; el.style.display = 'block';
             setTimeout(() => el.style.display = 'none', 3000);
         }
         function togglePanel(id) {
-            // 关闭其他面板
             ['settingsPanel', 'backupPanel'].forEach(pid => {
                 if(pid !== id) document.getElementById(pid).style.display = 'none';
             });
@@ -180,29 +210,48 @@
             el.style.display = (el.style.display === 'block') ? 'none' : 'block';
         }
 
-        // --- 设置管理 ---
+        // --- ⏳ 时光机逻辑 (Snapshot System) ---
+        function createSnapshot() {
+            // 在每次修改数据前调用，保存当前状态
+            localStorage.setItem('mySleepData_snapshot', JSON.stringify(sleepData));
+        }
+
+        function restoreSnapshot() {
+            const snap = localStorage.getItem('mySleepData_snapshot');
+            if(snap) {
+                if(confirm("确定要撤销上一步操作吗？\n数据将恢复到修改前的状态。")) {
+                    sleepData = JSON.parse(snap);
+                    saveAndRender(false); // false 表示不需要再次创建快照
+                    showMsg("✅ 时光倒流成功！");
+                }
+            } else {
+                showMsg("❌ 没有可撤销的操作");
+            }
+        }
+
         function saveSettings() {
             const val = document.getElementById('limitTimeInput').value;
             if(val) {
                 userSettings.limitTime = val;
                 localStorage.setItem('mySleepSettings', JSON.stringify(userSettings));
-                saveAndRender(); // 重新渲染图表以更新红线
+                saveAndRender(false); 
                 showMsg("✅ 设置已保存");
             }
         }
 
-        // --- 数据管理 ---
         function clearAllData() {
-            if(confirm("⚠️ 确定要清空所有数据吗？\n此操作无法撤销！")) {
+            if(confirm("⚠️ 确定要清空所有数据吗？")) {
+                createSnapshot(); // 快照
                 sleepData = [];
-                saveAndRender();
-                showMsg("已清空所有数据");
+                saveAndRender(false); // 此时不需要再次快照
+                showMsg("已清空");
             }
         }
         function resetDemoData() {
-            if(confirm("确定要恢复到初始的3条示范数据吗？\n当前数据将被覆盖！")) {
+            if(confirm("恢复示范数据？当前数据将被覆盖！")) {
+                createSnapshot(); // 快照
                 sleepData = JSON.parse(JSON.stringify(DEMO_DATA));
-                saveAndRender();
+                saveAndRender(false);
                 showMsg("已恢复示范数据");
             }
         }
@@ -221,8 +270,10 @@
             reader.onload = function(e) {
                 try {
                     const json = JSON.parse(e.target.result);
-                    if(Array.isArray(json)) { sleepData = json; saveAndRender(); showMsg(`✅ 导入 ${json.length} 条数据`); togglePanel('backupPanel'); } 
-                    else { showMsg("❌ 格式错误"); }
+                    if(Array.isArray(json)) { 
+                        createSnapshot(); // 快照
+                        sleepData = json; saveAndRender(false); showMsg(`✅ 导入成功`); togglePanel('backupPanel'); 
+                    } else { showMsg("❌ 格式错误"); }
                 } catch(err) { showMsg("❌ 文件无法读取"); }
                 input.value = '';
             }; reader.readAsText(file);
@@ -231,16 +282,18 @@
             const str = JSON.stringify(sleepData);
             document.getElementById('dataBox').value = str;
             document.getElementById('dataBox').select();
-            document.execCommand('copy'); // 兼容旧设备
-            showMsg("✅ 数据已复制到剪贴板");
+            document.execCommand('copy'); 
+            showMsg("✅ 已复制到剪贴板");
         }
         function pasteTextData() {
             const raw = document.getElementById('dataBox').value.trim();
             if(!raw) return showMsg("❌ 框里是空的");
             try {
                 const json = JSON.parse(raw);
-                if(Array.isArray(json)) { sleepData = json; saveAndRender(); showMsg(`✅ 恢复 ${json.length} 条数据`); togglePanel('backupPanel'); } 
-                else { showMsg("❌ 格式错误"); }
+                if(Array.isArray(json)) { 
+                    createSnapshot(); // 快照
+                    sleepData = json; saveAndRender(false); showMsg(`✅ 恢复成功`); togglePanel('backupPanel'); 
+                } else { showMsg("❌ 格式错误"); }
             } catch(e) { showMsg("❌ 代码不完整"); }
         }
 
@@ -248,7 +301,6 @@
         function timeToNumber(timeStr) {
             const [h, m] = timeStr.split(':').map(Number);
             let val = h + m / 60;
-            // 21:00 前的时间算次日 (适配大部分夜猫子，允许早睡到21点)
             if (val < 21) val += 24;
             return val;
         }
@@ -259,23 +311,14 @@
             if (m === 60) { h += 1; m = 0; }
             return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
         }
-
-        // 评分逻辑 (动态红线)
         function calculateScore(duration, startVal) {
             let score = 100;
-            // 1. 时长分
             if (duration < 7) score -= (7 - duration) * 10; 
             if (duration > 10) score -= (duration - 10) * 5;
-            
-            // 2. 入睡分 (基于用户设定的红线)
-            // 先解析用户红线时间
             let limitVal = timeToNumber(userSettings.limitTime);
-            // 如果红线设得太早(比如22点)，导致数值很大(46)，逻辑可能要微调，但这里通用逻辑是比较差值
-            
-            // 只有当入睡时间 晚于 红线 才扣分
             if (startVal > limitVal) {
                 let delay = startVal - limitVal;
-                score -= delay * 5; // 每晚于红线1小时扣5分
+                score -= delay * 5; 
             }
             return Math.max(0, Math.min(100, Math.round(score)));
         }
@@ -284,7 +327,7 @@
             const date = document.getElementById('dateInput').value;
             const bedTime = document.getElementById('bedInput').value;
             const wakeTime = document.getElementById('wakeInput').value;
-            const note = document.getElementById('noteInput').value.trim(); // 获取备注
+            const note = document.getElementById('noteInput').value.trim();
 
             if (!date || !bedTime || !wakeTime) return showMsg("❌ 请填写完整");
             
@@ -292,6 +335,9 @@
             if (existingIndex >= 0) {
                 if(!confirm(`⚠️ 日期 ${date} 已存在！\n确定要覆盖吗？`)) return;
             }
+
+            // 修改前创建快照
+            createSnapshot();
 
             let startVal = timeToNumber(bedTime);
             let endVal = timeToNumber(wakeTime);
@@ -304,12 +350,9 @@
             else { sleepData.push(newData); showMsg("✅ 已记录"); }
             
             sleepData.sort((a, b) => new Date(a.date) - new Date(b.date));
-            saveAndRender(); 
+            saveAndRender(false); // 这里false是因为我们在上面已经createSnapshot了
             
-            // 记录后清空备注框
             document.getElementById('noteInput').value = '';
-            
-            // 滚动到最右
             setTimeout(() => {
                 const wrapper = document.querySelector('.chart-container-wrapper');
                 wrapper.scrollLeft = wrapper.scrollWidth;
@@ -317,52 +360,48 @@
         }
 
         function editData(index) {
-            // index 是原始数据的索引
             const item = sleepData[index];
             document.getElementById('dateInput').value = item.date;
             document.getElementById('bedInput').value = item.bedTime;
             document.getElementById('wakeInput').value = item.wakeTime;
-            document.getElementById('noteInput').value = item.note || ''; // 回填备注
+            document.getElementById('noteInput').value = item.note || '';
             
-            sleepData.splice(index, 1); saveAndRender(); 
+            createSnapshot(); // 快照
+            sleepData.splice(index, 1); 
+            saveAndRender(false); 
             window.scrollTo({top:0, behavior:'smooth'}); 
-            showMsg("📝 数据已提取，请修改后保存");
+            showMsg("📝 提取修改 (可撤销)");
         }
         function deleteData(index) { 
             if(confirm("确定删除这条记录吗？")) {
-                sleepData.splice(index, 1); saveAndRender(); showMsg("🗑️ 已删除"); 
+                createSnapshot(); // 快照
+                sleepData.splice(index, 1); saveAndRender(false); showMsg("🗑️ 已删除 (可撤销)"); 
             }
         }
-        function saveAndRender() { localStorage.setItem('mySleepData_v6', JSON.stringify(sleepData)); renderTable(); renderChart(); }
+        // updateSnapshot 参数控制是否需要创建快照（有些函数内部已经创建了）
+        function saveAndRender(createSnap = true) { 
+            if(createSnap) createSnapshot();
+            localStorage.setItem('mySleepData_v6', JSON.stringify(sleepData)); 
+            renderTable(); renderChart(); 
+        }
         
         function renderTable() {
             const tbody = document.querySelector('#historyTable tbody');
             tbody.innerHTML = '';
-            // 倒序显示
             const reversedData = sleepData.map((item, index) => ({item, index})).reverse();
-
             reversedData.forEach(({item, index}) => {
-                // 每次渲染重算分数 (因为红线可能变了)
                 item.score = calculateScore(item.duration, item.startVal);
-                
                 const noteHtml = item.note ? `<span class="note-text">📝 ${item.note}</span>` : '';
-                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                 <td>${item.date.slice(5)}</td>
-                <td>
-                    ${item.bedTime} - ${item.wakeTime}
-                    ${noteHtml}
-                </td>
-                <td>
-                    <span style="color:${item.duration>=7?'#20bf6b':'#f39c12'};font-weight:bold">${item.duration}h</span><br>
-                    <span style="font-size:10px; padding:1px 5px; border-radius:3px; color:white; background:${getScoreColor(item.score)}">${item.score}分</span>
-                </td>
+                <td>${item.bedTime} - ${item.wakeTime}${noteHtml}</td>
+                <td><span style="color:${item.duration>=7?'#20bf6b':'#f39c12'};font-weight:bold">${item.duration}h</span><br>
+                <span style="font-size:10px; padding:1px 5px; border-radius:3px; color:white; background:${getScoreColor(item.score)}">${item.score}分</span></td>
                 <td><button class="act-btn" onclick="editData(${index})">改</button><button class="act-btn" onclick="deleteData(${index})">删</button></td>`;
                 tbody.appendChild(tr);
             });
         }
-
         function getScoreColor(score) {
             if(score >= 80) return '#20bf6b'; 
             if(score >= 60) return '#f39c12'; 
@@ -380,8 +419,6 @@
             document.getElementById('chartBody').style.width = `${w}px`;
             
             if (myChart) myChart.destroy();
-            
-            // 获取用户设定的红线数值
             const limitVal = timeToNumber(userSettings.limitTime);
 
             myChart = new Chart(ctx, {
@@ -393,17 +430,13 @@
                             label: '入睡', 
                             data: sleepData.map(d => d.startVal), 
                             borderColor: '#A2D2FF', backgroundColor: '#A2D2FF', borderWidth: 2, tension: 0.3, yAxisID: 'yTime', 
-                            // 动态点逻辑：
-                            // 1. 0点前 (24.5) -> 星星
-                            // 2. 红线前 (limitVal) -> 黄色
-                            // 3. 红线后 -> 蓝色
                             pointStyle: (ctx) => (ctx.raw <= 24.5) ? 'star' : 'circle',
                             pointRadius: (ctx) => (ctx.raw <= 24.5) ? 8 : 4,
                             pointBackgroundColor: (ctx) => {
                                 const v = ctx.raw;
-                                if (v <= 24.5) return '#ffd700'; // 🌟
-                                if (v < limitVal) return '#FDE598'; // 🟡 达标(红线前)
-                                return '#A2D2FF'; // 🔵 晚睡
+                                if (v <= 24.5) return '#ffd700'; 
+                                if (v < limitVal) return '#FDE598'; 
+                                return '#A2D2FF'; 
                             },
                             pointBorderColor: (ctx) => {
                                 const v = ctx.raw;
@@ -460,7 +493,7 @@
                                     label: { content:'00:00', display:true, position:'end', xAdjust: 60, color:'#333', font:{size:10, weight:'bold'}, backgroundColor:'transparent' }
                                 },
                                 line3: {
-                                    type:'line', scaleID:'yTime', value: limitVal, // 动态红线
+                                    type:'line', scaleID:'yTime', value: limitVal, 
                                     borderColor:'#ff4757', borderWidth:1, borderDash:[6,6],
                                     label: { content: numberToTime(limitVal), display:true, position:'end', xAdjust: 60, color:'#ff4757', font:{size:10, weight:'bold'}, backgroundColor:'transparent' }
                                 }
@@ -476,18 +509,15 @@
             });
         }
         
-        // 默认日期设为昨天
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         document.getElementById('dateInput').valueAsDate = yesterday;
         
-        saveAndRender();
-        
+        saveAndRender(false);
         setTimeout(() => {
             const wrapper = document.querySelector('.chart-container-wrapper');
             wrapper.scrollLeft = wrapper.scrollWidth;
         }, 500);
-
         document.getElementById('sleepChart').onclick = function(evt) {
             const points = myChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
             if (points.length === 0) {
